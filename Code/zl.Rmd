@@ -1,0 +1,55 @@
+---
+title: "Product Category Analysis"
+author: "Gaurav Chaturvedi"
+date: "Thursday, August 20, 2015"
+output: html_document
+---
+
+# Data Exploration
+
+## Load Libraries
+```{r echo=TRUE, cache=FALSE, message=FALSE, warning = FALSE}
+# load the libraries
+library(rCharts)
+library(pander)
+```
+
+
+# Read the data  
+```{r echo=TRUE, cache=FALSE, message=FALSE, warning = FALSE}
+prodds <- read.csv("../Data/products.csv", sep = ",", header=TRUE)
+
+
+# Add Metrics (sale count, net sale count, impressions, views)
+ ## Total Sale Count
+prodds$tot_sale_count <- prodds$net_sale_count+prodds$rejected_returned_sale_count + prodds$canceled_sale_count
+
+## Discount Percentage
+prodds$special_price[is.na(prodds$special_price)] <- prodds$original_price[is.na(prodds$special_price)]
+prodds$disc_p <- round ((prodds$original_price-prodds$special_price)/prodds$original_price,2)
+
+# Net Sale Count by Category
+prod.s1 <- aggregate(net_sale_count ~ cat_type, FUN=sum, data=prodds)
+prod.s1 <- prod.s1[order(-prod.s1$net_sale_count),]
+
+# Total Sale Count by Category
+prod.s2 <- aggregate(tot_sale_count ~ cat_type, FUN=sum, data=prodds)
+prod.s2 <- prod.s2[order(-prod.s2$tot_sale_count),]
+
+# Total Views by Category 
+prod.v1 <- aggregate(views_count ~ cat_type, FUN=sum, data=prodds)
+prod.v1 <- prod.v1[order(-prod.v1$views_count),]
+
+# Total Impressions by Category
+prod.v2 <- aggregate(impressions_count ~ cat_type, FUN=sum, data=prodds)
+prod.v2 <- prod.v2[order(-prod.v2$impressions_count),]
+
+# By Brands 
+prod.b1 <- aggregate(impressions_count ~ cat_type, FUN=sum, data=prodds)
+prod.v2 <- prod.v2[order(-prod.v2$impressions_count),]
+
+```
+
+p <- as.data.frame(table(prodds$cat_type))
+names(p) <- c("category", "Freq")
+g <- ggplot(data=prodds, aes(x = cat_type, y=net_sale_count, fill = sub_cat_type))
